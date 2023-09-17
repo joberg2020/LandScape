@@ -27,4 +27,16 @@ export class Point {
     return this.#y;
   }
 
+  /**
+   * @description Checks if the current point is equal to another point.
+   * @param {Point} other The point to compare with.
+   * @throws {Error} If the other point is not a Point-object.
+   * @returns True if the points are equal, false otherwise.
+   */
+  equals(other) {
+    if (!other instanceof Point) {
+      return false;
+    }
+    return this.x == other.x && this.y == other.y;
+  }
 }
