@@ -138,6 +138,17 @@ export class CoordinateSystem {
     this.#origo = point;
   }
 
+  /**
+   * Returns the center point of the coordinate system.
+   *
+   * @readonly
+   * @memberof CoordinateSystem
+   * @return {Point} The center point of the coordinate system.
+   */
+  get centerPoint() {
+    return new Point(this.x.range.middle, this.y.range.middle);
+  }
+
   contains(point) {
     return this.#x.contains(point.x) && this.#y.contains(point.y);
   }

@@ -6,11 +6,12 @@ import { Interval } from './Interval.js';
  * @class Axis
  */
 export class Axis {
-  
+
 
   #range;
   #scale;
-  #isReversed; 
+  #isReversed;
+  #scaleHistory = [];
 
   /**
    * Creates an instance of Axis. 
@@ -18,14 +19,12 @@ export class Axis {
    * @param {Interval} range Must be an Interval.
    * @param {number} scale Must be a positive number. Indicates the scale of the axis. I.e. higher values means that the axis is more "zoomed in". Default value is 1.
    * @param {boolean} isReversed A boolean value indicating whether the axis is reversed or not. Defaults to false which means a typical axis.
+   * @throws {Error} If the range is not an Interval.
+   * @throws {Error} If the scale is not a positive number.
    */
   constructor(range, scale = 1, isReversed = false) {
-    if (!range instanceof Interval) {
-      throw new Error('The range must be an Interval');
-    }
-    if (typeof scale != 'number') {
-      throw new Error('The scale must be a number');
-    }
+    this.#validateRange(range);
+    this.#validateScale(scale);
     this.#range = range;
     this.#scale = scale;
     this.#isReversed = isReversed;
@@ -45,9 +44,7 @@ export class Axis {
   }
 
   set range(newRange) {
-    if (!newRange instanceof Interval) {
-      throw new Error('The range must be an Interval');
-    }
+    this.#validateRange(newRange);
     this.#range = newRange;
   }
 
@@ -55,11 +52,25 @@ export class Axis {
     return this.#scale;
   }
 
+  /**
+   * @description Sets the scale of the axis. The new scale must be a positive number. Saves the old scale in the scaleHistory.
+   * @param {number} newScale The new scale of the axis.
+   *
+   * @memberof Axis
+   */
   set scale(newScale) {
-    if (typeof newScale != 'number' || newScale <= 0) {
-      throw new Error('The scale must be a positive number');
-    }
+    this.#validateScale(newScale);
+    this.#scaleHistory.push(this.#scale);
     this.#scale = newScale;
+  }
+
+  /**
+   * @description Undoes the last scale change. If no change has been made, nothing happens.
+   */
+  undoScaleChange() {
+    if (this.#scaleHistory.length > 0) {
+      this.#scale = this.#scaleHistory.pop();
+    }
   }
 
   get isReversed() {
@@ -71,5 +82,17 @@ export class Axis {
       throw new Error('The isReversed property must be a boolean');
     }
     this.#isReversed = value;
+  }
+
+  #validateRange(interval) {
+    if (!(interval instanceof Interval)) {
+      throw new Error('The range must be an Interval.');
+    }
+  }
+
+  #validateScale(scale) {
+    if (typeof scale != 'number' || scale < 0) {
+      throw new Error('The scale must be a positive number larger than 0');
+    }
   }
 }

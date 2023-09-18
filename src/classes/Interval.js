@@ -11,7 +11,7 @@ export class Interval {
       throw new Error('The Interval must be defined by numbers');
     }
     if (lowerBound > upperBound) {
-      throw new Error('The lower bound must be less than or equal to the upper bound');
+      throw new Error('The lower bound must be less than the upper bound');
     }
     this.#lowerBound = lowerBound;
     this.#upperBound = upperBound;
@@ -26,7 +26,11 @@ export class Interval {
   }
 
   get middle() {
-    return (this.#lowerBound + this.#upperBound) / 2;
+    return ((this.#lowerBound + this.#upperBound) / 2);
+  }
+
+  get intervalLength() {
+    return this.#upperBound - this.#lowerBound;
   }
 
   contains(value) {
