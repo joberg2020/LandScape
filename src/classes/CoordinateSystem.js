@@ -36,7 +36,6 @@ export class CoordinateSystem {
     }
   }
 
-
   /**
    * Tries to establish a resonable origo for the coordinate system. Will be (0, 0) if possible, otherwise the center of the ranges of the axes.
    * @returns {Point} The suggested origo for the coordinate system.
@@ -147,6 +146,28 @@ export class CoordinateSystem {
    */
   get centerPoint() {
     return new Point(this.x.range.middle, this.y.range.middle);
+  }
+
+  /**
+   * @description Makes the axes even. The scale of the axes will be adjusted so that the number of pixels per unit is the same for both axes.
+   * If the axes are already even, nothing happens.
+   * @memberof CoordinateSystem
+   */
+  makeAxesEven() {
+    if ((this.x.range.length * this.x.scale) > (this.y.range.length * this.y.scale)) {
+      this.y.scale = (this.x.range.length * this.x.scale) / this.y.range.length;
+    }
+    else {
+      this.x.scale = (this.y.range.length * this.y.scale) / this.x.range.length;
+    }
+  }
+
+  /**
+   * @description If axes scales have been changed, this function restores the axes to their previous scale. If they have not been changed, nothing happens.
+   */
+  restoreAxisToPreviousScale() {
+    this.x.undoScaleChange();
+    this.y.undoScaleChange();
   }
 
   contains(point) {

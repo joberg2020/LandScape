@@ -1,8 +1,10 @@
+import { GeometryObject } from "./GeometryObject";
+
 /**
  * @class Point
  * @description Represents a point in a 2D space.
  */
-export class Point {
+export class Point extends GeometryObject {
   #x;
   #y;
 

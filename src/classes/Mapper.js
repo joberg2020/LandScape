@@ -1,15 +1,15 @@
 import { CoordinateSystem } from "./CoordinateSystem";
 import { Point } from "./Point";
 import { Axis } from "./Axis";
-
+/**
+ * Maps between coordinate systems. 
+ */
 export class Mapper {
 
   #sourceSystem;
   #targetSystem;
   #xMappingRatio;
   #yMappingRatio;
-  #xOffset;
-  #yOffset;
   #xTargetCenter;
   #yTargetCenter;
   #xSourceCenter;
@@ -21,12 +21,9 @@ export class Mapper {
    * @param {CoordinateSystem} targetSystem 
    */
   constructor(sourceSystem, targetSystem) {
-    if (!(sourceSystem instanceof CoordinateSystem)) {
-      throw new Error('The sourceSystem must be a CoordinateSystem-object');
-    }
-    if (!(targetSystem instanceof CoordinateSystem)) {
-      throw new Error('The targetSystem must be a CoordinateSystem-object');
-    }
+    this.#validateCoordinateSystem(sourceSystem)
+    this.#validateCoordinateSystem(targetSystem)
+    
     this.#sourceSystem = sourceSystem;
     this.#targetSystem = targetSystem;
     this.#initializeMappingRatios();
@@ -34,11 +31,18 @@ export class Mapper {
   }
 
   #initializeMappingRatios() {
-    this.#xMappingRatio = (this.#targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) / (this.#sourceSystem.x.range.intervalLength * this.targetSystem.x.scale);
+    this.#xMappingRatio = 
+    (this.#targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) /
+    (this.#sourceSystem.x.range.intervalLength * this.targetSystem.x.scale);
+    
     if (this.#sourceSystem.x.isReversed !== this.#targetSystem.x.isReversed) {
       this.#xMappingRatio *= -1;
     }
-    this.#yMappingRatio = (this.#targetSystem.y.range.intervalLength * this.#sourceSystem.y.scale) / (this.#sourceSystem.y.range.intervalLength * this.#targetSystem.y.scale);
+
+    this.#yMappingRatio = 
+    (this.#targetSystem.y.range.intervalLength * this.#sourceSystem.y.scale) / 
+    (this.#sourceSystem.y.range.intervalLength * this.#targetSystem.y.scale);
+
     if (this.#sourceSystem.y.isReversed !== this.#targetSystem.y.isReversed) {
       this.#yMappingRatio *= -1;
     }
@@ -67,6 +71,12 @@ export class Mapper {
 
   get mappingRatioY() {
     return this.#yMappingRatio;
+  }
+
+  #validateCoordinateSystem(system) {
+    if(!(system instanceof CoordinateSystem)) {
+      throw new Error('The sourceSystem must be a CoordinateSystem-object');
+    }
   }
 
   /**
