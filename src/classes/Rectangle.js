@@ -5,9 +5,10 @@ export class Rectangle extends GeometryObject {
   #startingPoint
   #width
   #height
+  #rotationAngle = 0;
 
-  constructor (startingPoint, width, height) {
-    super();
+  constructor (startingPoint, width, height, strategy=null) {
+    strategy ? super(strategy) : super();
     super.validatePoint(startingPoint)
     super.validateNumber(width, height);
     if (width < 0 || height < 0) {
@@ -28,6 +29,15 @@ export class Rectangle extends GeometryObject {
 
   get height () {
     return this.#height;
+  }
+
+  get rotationAngle() {
+    return this.#rotationAngle;
+  }
+
+  set rotationAngle(value) {
+    super.validateNumber(value);
+    this.#rotationAngle += value;
   }
 
   get minX() {

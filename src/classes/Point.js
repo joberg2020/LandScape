@@ -12,12 +12,14 @@ export class Point extends GeometryObject {
    * 
    * @param {number} x The x coordinate of the point.
    * @param {number} y THe y coordinate of the point.
+   * @param {GeometryStrategy} strategy The strategy-interface.
    */
-  constructor(x, y) {
+  constructor(x, y, strategy = null) {
     if (typeof x != 'number' || typeof y != 'number') {
       throw new Error('The coordinates must be numbers');
     }
-    super();
+    strategy !== null? super(strategy) : super();
+    
     this.#x = x;
     this.#y = y;
   }

@@ -5,8 +5,8 @@ export class Line extends GeometryObject {
   #startPoint
   #endPoint
 
-  constructor(start, end) {
-    super();
+  constructor(start, end, strategy = null) {
+    strategy ? super(strategy) : super();
     super.validatePoint(start)
     super.validatePoint(end)
     this.#startPoint = start;

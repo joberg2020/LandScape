@@ -5,8 +5,8 @@ export class Circle extends GeometryObject {
   #radius;
   #centerPoint;
 
-  constructor (centerPoint, radius) {
-    super();
+  constructor (centerPoint, radius, strategy = null) {
+    strategy ? super(strategy) : super();
     super.validatePoint(centerPoint);
     this.#centerPoint = centerPoint;
     super.validateNumber(radius)

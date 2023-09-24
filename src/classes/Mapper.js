@@ -32,6 +32,10 @@ export class Mapper {
 
   }
 
+  /**
+   * Calculates and sets the mapping ratio properties, which is the translater between sourcesystem and target coordinate system. 
+   * Mapping ratio depends on both systems axes´ intervals and scales and also if the scales are reversed. There is a ratio for each axis.
+   */
   #initializeMappingRatios() {
     this.#xMappingRatio = 
     (this.targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) /
@@ -127,25 +131,6 @@ export class Mapper {
     this.#initializeMappingRatios();
   }
 
-
-  /**
-   * @description Maps a point from the source coordinate system to the target coordinate system.
-   * @param {Point} point The point to map.
-   * @returns {Point} The mapped point.
-   * @throws {Error} If the point is not a Point-object.
-   */
-  mapPoint(point) {
-    if (!(point instanceof Point)) {
-      throw new Error('The point must be a Point');
-    }
-    else {
-      const newX = this.#xMappingRatio * (point.x - this.#xSourceCenter) + this.#xTargetCenter;
-      console.log('Mappin point.x: ', point.x, ' pointY: ', point.y);
-      const newY = this.#yMappingRatio * (point.y - this.#ySourceCenter) + this.#yTargetCenter;
-      return new Point(newX, newY);
-    }
-  }
-
   unMapPoint(point) {
     console.log('target.x: ', point.x, ' xTargetCenter: ', this.#xTargetCenter, 'XMP: ', this.mappingRatioX, 'xSC: ', this.#xSourceCenter)
     const sourceX = ((point.x - this.#xTargetCenter) / this.mappingRatioX) + this.#xSourceCenter;
@@ -153,28 +138,5 @@ export class Mapper {
     return new Point(sourceX, sourceY);
   }
 
-  mapPolygon(polygon) {
-  if (!(polygon instanceof Polygon)) {
-    throw new Error('The argument must be a Polygon-object');
-  }
-  const mappedPoints = [];
-    for (const p of polygon.listOfPoints) {
-      mappedPoints.push(this.mapPoint(p));
-    }
-    return new Polygon(...mappedPoints);
-  }
-
-  rotatePoint(pointToRotate, radians) {
-    const originalX = pointToRotate.x;
-    const originalY = pointToRotate.y;
-    const centerPoint = this.mapPoint(this.#sourceSystem.centerPoint)
-    pointToRotate.x = (originalX - centerPoint.x) * Math.cos(radians) - (originalY - centerPoint.y) * Math.sin(radians) + centerPoint.x;
-    pointToRotate.y = (originalX - centerPoint.x) * Math.sin(radians) + (originalY - centerPoint.y) * Math.cos(radians) + centerPoint.y;
-  }
-
-  rotatePolygon(polygon, radians) {
-    for (const p of polygon.listOfPoints) {
-      this.rotatePoint(p, radians);
-    }
-  }
+  
 }

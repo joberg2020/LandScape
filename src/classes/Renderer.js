@@ -6,6 +6,8 @@ import { Interval } from './Interval.js';
 import { Circle } from './Circle.js';
 import { Polygon } from './Polygon.js';
 import { Line } from './Line.js';
+import { GeometryObject } from './GeometryObject.js';
+import { PointStrategy } from '../strategies/PointStrategy.js';
 
 
 export class Renderer {
@@ -30,13 +32,14 @@ export class Renderer {
       this.#resizeCanvasIfNeeded(canvasElement, coordinateSystem);
       this.#canvasContext = canvasElement.getContext('2d');
       coordinateSystem.normalizeScales();
+      // Create the Mapper
       this.#initializeMapper(coordinateSystem, canvasElement);
       this.#addEventListeners(canvasElement);
     }
   }
 
   /**
-   * If source coordinate system has different width/height ratio compared to canvas, the canvas haight will be adjusted to force the same ratio for canvas. 
+   * If source coordinate system has different width/height ratio compared to canvas, the canvas height will be adjusted to force the same ratio for canvas. 
    * Canvas width will be the same as before.
    * @param {HTMLCanvasElement} canvas 
    * @param {CoordinateSystem} sourceSystem 
@@ -54,7 +57,7 @@ export class Renderer {
   #initializeMapper(sourceSystem, canvas) {
     console.log('Mapper should be created');
     console.log('Canvas.width: ', canvas.width);
-
+    // Create Mapper with the given source system and the target system based on the canvas coordinate system (y-axis is reversed, origin in top left corner).
     this.#mapper = new Mapper(sourceSystem,
       new CoordinateSystem({
         'xAxis': new Axis(new Interval(0, canvas.width), 1),
@@ -68,34 +71,26 @@ export class Renderer {
 
   printSourceCoordinate(event) {
     const rect = event.target.getBoundingClientRect();
-    const targetPoint = new Point(event.clientX - rect.left, event.clientY - rect.top);
-    this.#mapper.rotatePoint(targetPoint, -this.#rotation)
-    const sourcePoint = this.#mapper.unMapPoint(targetPoint);
+    const targetPoint = new Point(event.clientX - rect.left, event.clientY - rect.top, new PointStrategy(this.mapper));
+    const unRotatedPoint = targetPoint.getRotatedObject(-this.#rotation);
+    const sourcePoint = this.#mapper.unMapPoint(unRotatedPoint);
     console.log('x: ', sourcePoint.x, '\ny: ', sourcePoint.y);
   }
 
+  get mapper() {
+    return this.#mapper;
+  }
+  /**
+   * Adds a geometryobject, defined in coordinates of the source coordinate system, to the collection of objects.
+   * @param {GeometryObject} geometryObject 
+   */
   add(geometryObject) {
     this.#geometryObjects.push(geometryObject)
   }
 
   mapObjects() {
     for (const obj of this.#geometryObjects) {
-      if (obj instanceof Point) {
-        this.#mappedGeometryObjects.push(this.#mapper.mapPoint(obj));
-      }
-      else if (obj instanceof Circle) {
-        this.#mappedGeometryObjects.push(this.#mapper.mapCircle(obj));
-      }
-      else if (obj instanceof Polygon) {
-        this.#mappedGeometryObjects.push(this.#mapper.mapPolygon(obj));
-      }
-      else if (obj instanceof Line) {
-        this.#mappedGeometryObjects.push(this.#mapper.mapLine(obj));
-      }
-      else if (obj instanceof Rectangle) {
-        this.#mappedGeometryObjects.push(this.#mapper.mapRectangle(obj));
-      }
-      else throw new Error('The object is not a known geometric object');
+      this.#mappedGeometryObjects.push(obj.getMappedObject());
     }
   }
 
@@ -132,28 +127,20 @@ export class Renderer {
 
   renderOnCanvas() {
     for (const obj of this.#mappedGeometryObjects) {
-      if (obj instanceof Point) {
-        this.#renderPoint(obj);
-      }
-      else if (obj instanceof Circle) {
-        this.#renderCircle(obj);
-      }
-      else if (obj instanceof Polygon) {
-        this.#renderPolygon(obj);
-      }
-      else if (obj instanceof Line) {
-        this.#renderLine(obj);
-      }
-      else if (obj instanceof Rectangle) {
-        this.#renderRectangle(obj);
-      }
-      else throw new Error('The object is not a known geometric object');
+      obj.renderObject(this.#canvasContext);
     }
   }
 
   showCenter() {
-    this.#renderPoint(this.#mapper.mapPoint(this.#mapper.sourceSystem.centerPoint));
-    this.#renderPoint(this.#mapper.sourceSystem.centerPoint);
+    const center = this.mapper.sourceSystem.centerPoint;
+    const thatPoint = new Point(center.x, center.y, new PointStrategy(this.mapper));
+    // render mapped point
+    thatPoint
+    .getMappedObject()
+    .renderObject(this.#canvasContext);
+    // render unmapped point
+    thatPoint.renderObject(this.#canvasContext);
+    console.log("Center point:", thatPoint);
   }
 
   /**
@@ -163,52 +150,13 @@ export class Renderer {
   rotateObjects(degrees) {
     const radians = (Math.PI/180)* degrees;
     this.#rotation += radians;
-    
+    const rotatedObjects = [];
     for (const obj of this.#mappedGeometryObjects) {
-      if (obj instanceof Point) {
-        this.#mapper.rotatePoint(obj, radians);
-      }
-      else if (obj instanceof Circle) {
-        
-      }
-      else if (obj instanceof Polygon) {
-        this.#mapper.rotatePolygon(obj, radians);
-      }
-      else if (obj instanceof Line) {
-        
-      }
-      else if (obj instanceof Rectangle) {
-        
-      }
-      else throw new Error('The object is not a known geometric object');
+      rotatedObjects.push(obj.getRotatedObject(radians)) 
     }
+    this.#mappedGeometryObjects = rotatedObjects;
     this.#canvasContext.reset();
     this.renderOnCanvas();
-  }
-
-  #renderPoint(point) {
-    this.#canvasContext.fillRect(point.x - 1, point.y - 1, 2, 2);
-  }
-
-  #renderCircle(circle) {
-    this.#canvasContext.beginPath();
-    this.#canvasContext.arc(circle.center.x, circle.center.y, circle.radius, 2 * Math.PI);
-  }
-
-  #renderPolygon(polygon) {
-    let isFirst = true;
-    let firstPoint = null;
-    for (const p of polygon.listOfPoints) {
-      if (isFirst) {
-        this.#canvasContext.beginPath;
-        this.#canvasContext.moveTo(p.x, p.y);
-        firstPoint = p;
-        isFirst = false;
-      }
-      this.#canvasContext.lineTo(p.x, p.y);
-    }
-    this.#canvasContext.lineTo(firstPoint.x, firstPoint.y);
-    this.#canvasContext.stroke();
   }
 
   #renderLine(line) {

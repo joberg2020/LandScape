@@ -4,10 +4,9 @@ export class Polygon extends GeometryObject {
 
   #nodePoints = [];
 
-  constructor(...points) {
-    super();
+  constructor(strat=null, ...points) {
+    strat ? super(strat) : super();
     for (const p of points) {
-
       super.validatePoint(p);
       this.#nodePoints.push(p);
     }
