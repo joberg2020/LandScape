@@ -6,6 +6,7 @@ export class Line extends GeometryObject {
   #endPoint
 
   constructor(start, end) {
+    super();
     super.validatePoint(start)
     super.validatePoint(end)
     this.#startPoint = start;
@@ -18,5 +19,21 @@ export class Line extends GeometryObject {
 
   get endPoint() {
     return this.#endPoint;
+  }
+
+  get minX() {
+    return Math.min(this.#startPoint.x, this.#endPoint.x);
+  }
+
+  get maxX() {
+    return Math.max(this.#startPoint.x, this.#endPoint.x);
+  }
+
+  get minY() {
+    return Math.min(this.#startPoint.y, this.#endPoint.y);
+  }
+
+  get maxY() {
+    return Math.max(this.#endPoint.y, this.#startPoint.y);
   }
 }

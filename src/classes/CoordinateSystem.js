@@ -1,5 +1,6 @@
 import { Point } from './Point.js';
 import { Axis } from './Axis.js';
+import { Interval } from './Interval.js';
 
 export class CoordinateSystem {
   #x;
@@ -34,6 +35,12 @@ export class CoordinateSystem {
     if (!(axis instanceof Axis)) {
       throw new Error('The axes must be Axis-objects');
     }
+  }
+
+  normalizeScales() {
+    const ratio = this.x.range.intervalLength / this.y.range.intervalLength;
+    this.x.scale *= ratio;
+    this.y.scale /= ratio;
   }
 
   /**
@@ -154,11 +161,11 @@ export class CoordinateSystem {
    * @memberof CoordinateSystem
    */
   makeAxesEven() {
-    if ((this.x.range.length * this.x.scale) > (this.y.range.length * this.y.scale)) {
-      this.y.scale = (this.x.range.length * this.x.scale) / this.y.range.length;
+    if ((this.x.range.intervalLength * this.x.scale) > (this.y.range.intervalLength * this.y.scale)) {
+      this.y.scale = (this.x.range.intervalLength * this.x.scale) / this.y.range.intervalLength;
     }
     else {
-      this.x.scale = (this.y.range.length * this.y.scale) / this.x.range.length;
+      this.x.scale = (this.y.range.intervalLength * this.y.scale) / this.x.range.intervalLength;
     }
   }
 

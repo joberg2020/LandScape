@@ -7,8 +7,12 @@ export class Rectangle extends GeometryObject {
   #height
 
   constructor (startingPoint, width, height) {
+    super();
     super.validatePoint(startingPoint)
     super.validateNumber(width, height);
+    if (width < 0 || height < 0) {
+      throw new Error('Width and height must be positive numbers');
+    }
     this.#startingPoint = startingPoint;
     this.#width = width;
     this.#height = height;
@@ -24,5 +28,21 @@ export class Rectangle extends GeometryObject {
 
   get height () {
     return this.#height;
+  }
+
+  get minX() {
+    return this.#startingPoint.x;
+    }
+
+  get maxX() {
+    return this.#startingPoint.x + this.#width;
+  }
+
+  get minY() {
+    return this.#startingPoint.y;
+  }
+
+  get maxY () {
+    return this.#startingPoint.y + this.#height;
   }
 }

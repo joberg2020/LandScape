@@ -6,9 +6,13 @@ export class Circle extends GeometryObject {
   #centerPoint;
 
   constructor (centerPoint, radius) {
+    super();
     super.validatePoint(centerPoint);
     this.#centerPoint = centerPoint;
     super.validateNumber(radius)
+    if (radius < 0) {
+      throw new Error('Radius must be a positive number');
+    }
     this.#radius = radius;
   }
 
@@ -18,5 +22,21 @@ export class Circle extends GeometryObject {
 
   get center () {
     return this.#centerPoint;
+  }
+
+  get minX() {
+    return this.#centerPoint.x - this.#radius;
+  }
+
+  get maxX() {
+    return this.#centerPoint.x + this.#radius;
+  }
+
+  get minY() {
+    return this.#centerPoint.y - this.#radius;
+  }
+
+  get maxY() {
+    return this.#centerPoint.y + this.#radius;
   }
 }

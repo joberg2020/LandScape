@@ -21,8 +21,16 @@ export class Interval {
     return this.#lowerBound;
   }
 
+  set lowerBound(value) {
+    this.#lowerBound = value;
+  }
+
   get upperBound() {
     return this.#upperBound;
+  }
+
+  set upperBound(value) {
+    this.#upperBound = value;
   }
 
   get middle() {

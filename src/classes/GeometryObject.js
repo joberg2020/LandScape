@@ -2,7 +2,9 @@ import { Point } from "./Point";
 export class GeometryObject {
   
   constructor() {
-    throw new Error('GeometryObject is an abstract class and cannot be instantiated directly');
+    if (this.constructor === GeometryObject) {
+      throw new Error('GeometryObject is an abstract class and cannot be instantiated directly');
+    }
   }
 
   validatePoint(...points) {

@@ -1,6 +1,7 @@
 import { CoordinateSystem } from "./CoordinateSystem";
 import { Point } from "./Point";
 import { Axis } from "./Axis";
+import { Polygon } from "./Polygon";
 /**
  * Maps between coordinate systems. 
  */
@@ -26,24 +27,25 @@ export class Mapper {
     
     this.#sourceSystem = sourceSystem;
     this.#targetSystem = targetSystem;
-    this.#initializeMappingRatios();
     this.#initializeCenterPoints();
+    this.#initializeMappingRatios();
+
   }
 
   #initializeMappingRatios() {
     this.#xMappingRatio = 
-    (this.#targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) /
-    (this.#sourceSystem.x.range.intervalLength * this.targetSystem.x.scale);
+    (this.targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) /
+    (this.sourceSystem.x.range.intervalLength * this.targetSystem.x.scale);
     
-    if (this.#sourceSystem.x.isReversed !== this.#targetSystem.x.isReversed) {
+    if (this.sourceSystem.x.isReversed !== this.targetSystem.x.isReversed) {
       this.#xMappingRatio *= -1;
     }
-
+    console.log('target.x.range.length: ', this.#targetSystem.x.range.intervalLength, 'source.x.range.length: ', this.#sourceSystem.x.range.intervalLength,' sourceSystem.x.scale: ', this.targetSystem.x.scale);
     this.#yMappingRatio = 
-    (this.#targetSystem.y.range.intervalLength * this.#sourceSystem.y.scale) / 
-    (this.#sourceSystem.y.range.intervalLength * this.#targetSystem.y.scale);
+    (this.targetSystem.y.range.intervalLength * this.sourceSystem.y.scale) / 
+    (this.sourceSystem.y.range.intervalLength * this.targetSystem.y.scale);
 
-    if (this.#sourceSystem.y.isReversed !== this.#targetSystem.y.isReversed) {
+    if (this.sourceSystem.y.isReversed !== this.targetSystem.y.isReversed) {
       this.#yMappingRatio *= -1;
     }
     
@@ -87,6 +89,20 @@ export class Mapper {
     this.#initializeMappingRatios();
   }
 
+  changeSourceAxesIntervals(minX, maxX, minY, maxY) {
+    console.log('minX: ', minX, ' maxX: ', maxX, ' minY: ', minY, ' maxY: ', maxY);
+    this.#sourceSystem.x.range.lowerBound = minX - 5;
+    this.#sourceSystem.x.range.upperBound = maxX + 5;
+    this.#sourceSystem.y.range.lowerBound = minY - 5;
+    this.#sourceSystem.y.range.upperBound = maxY + 5;
+
+    // update MappingRatios
+    this.sourceSystem.normalizeScales();
+    this.#initializeCenterPoints();
+    this.#initializeMappingRatios();
+
+  }
+
   /**
    * @description Undoes the last scale change of the target coordinate system. If no change has been made, nothing happens.
    */
@@ -124,8 +140,41 @@ export class Mapper {
     }
     else {
       const newX = this.#xMappingRatio * (point.x - this.#xSourceCenter) + this.#xTargetCenter;
+      console.log('Mappin point.x: ', point.x, ' pointY: ', point.y);
       const newY = this.#yMappingRatio * (point.y - this.#ySourceCenter) + this.#yTargetCenter;
       return new Point(newX, newY);
+    }
+  }
+
+  unMapPoint(point) {
+    console.log('target.x: ', point.x, ' xTargetCenter: ', this.#xTargetCenter, 'XMP: ', this.mappingRatioX, 'xSC: ', this.#xSourceCenter)
+    const sourceX = ((point.x - this.#xTargetCenter) / this.mappingRatioX) + this.#xSourceCenter;
+    const sourceY = ((point.y - this.#yTargetCenter) / this.mappingRatioY) + this.#ySourceCenter;
+    return new Point(sourceX, sourceY);
+  }
+
+  mapPolygon(polygon) {
+  if (!(polygon instanceof Polygon)) {
+    throw new Error('The argument must be a Polygon-object');
+  }
+  const mappedPoints = [];
+    for (const p of polygon.listOfPoints) {
+      mappedPoints.push(this.mapPoint(p));
+    }
+    return new Polygon(...mappedPoints);
+  }
+
+  rotatePoint(pointToRotate, radians) {
+    const originalX = pointToRotate.x;
+    const originalY = pointToRotate.y;
+    const centerPoint = this.mapPoint(this.#sourceSystem.centerPoint)
+    pointToRotate.x = (originalX - centerPoint.x) * Math.cos(radians) - (originalY - centerPoint.y) * Math.sin(radians) + centerPoint.x;
+    pointToRotate.y = (originalX - centerPoint.x) * Math.sin(radians) + (originalY - centerPoint.y) * Math.cos(radians) + centerPoint.y;
+  }
+
+  rotatePolygon(polygon, radians) {
+    for (const p of polygon.listOfPoints) {
+      this.rotatePoint(p, radians);
     }
   }
 }

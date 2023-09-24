@@ -17,6 +17,7 @@ export class Point extends GeometryObject {
     if (typeof x != 'number' || typeof y != 'number') {
       throw new Error('The coordinates must be numbers');
     }
+    super();
     this.#x = x;
     this.#y = y;
   }
@@ -27,6 +28,14 @@ export class Point extends GeometryObject {
 
   get y() {
     return this.#y;
+  }
+
+  set x(value) {
+    this.#x = value;
+  }
+  
+  set y(value) {
+    this.#y = value;
   }
 
   /**
@@ -40,5 +49,21 @@ export class Point extends GeometryObject {
       return false;
     }
     return this.x == other.x && this.y == other.y;
+  }
+
+  get minY() {
+    return this.y;
+  }
+
+  get maxY() {
+    return this.y;
+  }
+
+  get minX() {
+    return this.x;
+  }
+
+  get maxX() {
+    return this.x;
   }
 }
