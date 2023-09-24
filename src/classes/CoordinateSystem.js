@@ -17,7 +17,7 @@ export class CoordinateSystem {
    * @throws {Error} If the axes are not Axis-objects.
    * @throws {Error} If the given origo is not within the range of the axes.
    */
-  constructor({ xAxis, yAxis, origo = null, autoAdjustOrigo = false }) {
+  constructor({ xAxis, yAxis, origo = null, autoAdjustOrigo = true }) {
     this.autoAdjustOrigo = autoAdjustOrigo;
     this.#validateAxis(xAxis);
     this.#validateAxis(yAxis);
@@ -37,6 +37,9 @@ export class CoordinateSystem {
     }
   }
 
+  /**
+   * Changes the scaling of coordinatesystems axes to adjust for uneven defined intervals. I.e. if range of x is bigger than range of y.
+   */
   normalizeScales() {
     const ratio = this.x.range.intervalLength / this.y.range.intervalLength;
     this.x.scale *= ratio;
@@ -157,7 +160,7 @@ export class CoordinateSystem {
 
   /**
    * @description Makes the axes even. The scale of the axes will be adjusted so that the number of pixels per unit is the same for both axes.
-   * If the axes are already even, nothing happens.
+   * If the axes are already even, nothing happens. Maybe deprecated, 'normalizeScales()' works better but in a different way...
    * @memberof CoordinateSystem
    */
   makeAxesEven() {
