@@ -1,7 +1,6 @@
 import { CoordinateSystem } from "./CoordinateSystem";
 import { Point } from "./Point";
-import { Axis } from "./Axis";
-import { Polygon } from "./Polygon";
+
 /**
  * Maps between coordinate systems. 
  */
@@ -11,14 +10,10 @@ export class Mapper {
   #targetSystem;
   #xMappingRatio;
   #yMappingRatio;
-  #xTargetCenter;
-  #yTargetCenter;
-  #xSourceCenter;
-  #ySourceCenter;
 
   /**
    * 
-   * @param {CoordinateSystem} sourceSystem 
+   * @param {CoordinateSystem} sourceSystem The coordinate system that you 
    * @param {CoordinateSystem} targetSystem 
    */
   constructor(sourceSystem, targetSystem) {
@@ -27,9 +22,12 @@ export class Mapper {
     
     this.#sourceSystem = sourceSystem;
     this.#targetSystem = targetSystem;
-    this.#initializeCenterPoints();
     this.#initializeMappingRatios();
 
+  }
+
+  initializeMappingRatios() {
+    this.#initializeMappingRatios();
   }
 
   /**
@@ -44,7 +42,7 @@ export class Mapper {
     if (this.sourceSystem.x.isReversed !== this.targetSystem.x.isReversed) {
       this.#xMappingRatio *= -1;
     }
-    console.log('target.x.range.length: ', this.#targetSystem.x.range.intervalLength, 'source.x.range.length: ', this.#sourceSystem.x.range.intervalLength,' sourceSystem.x.scale: ', this.targetSystem.x.scale);
+    
     this.#yMappingRatio = 
     (this.targetSystem.y.range.intervalLength * this.sourceSystem.y.scale) / 
     (this.sourceSystem.y.range.intervalLength * this.targetSystem.y.scale);
@@ -52,15 +50,11 @@ export class Mapper {
     if (this.sourceSystem.y.isReversed !== this.targetSystem.y.isReversed) {
       this.#yMappingRatio *= -1;
     }
+    console.log('target.x.range.length: ', this.#targetSystem.x.range.intervalLength, 'source.x.range.length: ',
+     this.#sourceSystem.x.range.intervalLength,' SourceYLength: ', this.#sourceSystem.y.range.intervalLength,'  sourceSystem.x.scale: ', this.#sourceSystem.x.scale, 'targetSystem.x.scale: ',
+     this.#sourceSystem.x.range.intervalLength,' sourceSystem.y.scale: ', this.#sourceSystem.y.scale, 'targetSystem.y.scale: ', this.#targetSystem.y.scale,
+     'sourceSystemYScale: ', this.#sourceSystem.y.scale, 'targetSystemYScale: ', this.#targetSystem.y.scale);
     
-  }
-
-  #initializeCenterPoints() {
-    this.#xTargetCenter = this.#targetSystem.centerPoint.x;
-    this.#yTargetCenter = this.#targetSystem.centerPoint.y;
-    this.#xSourceCenter = this.#sourceSystem.centerPoint.x;
-    this.#ySourceCenter = this.#sourceSystem.centerPoint.y;
-  
   }
 
   get sourceSystem() {
@@ -85,14 +79,6 @@ export class Mapper {
     }
   }
 
-  /**
-   * @description Makes the axes of the target coordinate system even. If the axes are already even, nothing happens.
-   */
-  harmonizeTargetScales() {
-    this.targetSystem.makeAxesEven();
-    this.#initializeMappingRatios();
-  }
-
   changeSourceAxesIntervals(minX, maxX, minY, maxY) {
     console.log('minX: ', minX, ' maxX: ', maxX, ' minY: ', minY, ' maxY: ', maxY);
     this.#sourceSystem.x.range.lowerBound = minX - 5;
@@ -102,39 +88,12 @@ export class Mapper {
 
     // update MappingRatios
     this.sourceSystem.normalizeScales();
-    this.#initializeCenterPoints();
-    this.#initializeMappingRatios();
-
-  }
-
-  /**
-   * @description Undoes the last scale change of the target coordinate system. If no change has been made, nothing happens.
-   */
-  undoScaleChangeTarget() {
-    this.targetSystem.undoScaleChange();
-    this.#initializeMappingRatios();
-  }
-  
-  /**
-   * @description Makes the axes of the source coordinate system even. If the axes are already even, nothing happens.
-   */
-  harmonizeSourceScales() {
-    this.sourceSystem.makeAxesEven();
-    this.#initializeMappingRatios();
-  }
-
-  /**
-   * @description Undoes the last scale change of the source coordinate system. If no change has been made, nothing happens.
-   */
-  undoScaleChangeSource() {
-    this.sourceSystem.undoScaleChange();
     this.#initializeMappingRatios();
   }
 
   unMapPoint(point) {
-    console.log('target.x: ', point.x, ' xTargetCenter: ', this.#xTargetCenter, 'XMP: ', this.mappingRatioX, 'xSC: ', this.#xSourceCenter)
-    const sourceX = ((point.x - this.#xTargetCenter) / this.mappingRatioX) + this.#xSourceCenter;
-    const sourceY = ((point.y - this.#yTargetCenter) / this.mappingRatioY) + this.#ySourceCenter;
+    const sourceX = ((point.x - this.#targetSystem.centerPoint.x) / this.mappingRatioX) + this.#sourceSystem.centerPoint.x;
+    const sourceY = ((point.y - this.#targetSystem.centerPoint.y) / this.mappingRatioY) + this.#sourceSystem.centerPoint.y;
     return new Point(sourceX, sourceY);
   }
 

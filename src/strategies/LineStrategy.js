@@ -13,7 +13,7 @@ export class LineStrategy extends GeometryStrategy {
   }
 
   getRotatedObject(line, radians) {
-    return new Line(line.startPoint.getRotatedObject(radians), line.endPoint.getMappedObject(), this);
+    return new Line(line.startPoint.getRotatedObject(radians), line.endPoint.getRotatedObject(radians), this);
   }
 
   renderObject(line, canvasContext) {

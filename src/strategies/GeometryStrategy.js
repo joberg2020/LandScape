@@ -1,4 +1,3 @@
-import { Mapper } from '../classes/Mapper.js';
 export class GeometryStrategy {
   mapper;
 

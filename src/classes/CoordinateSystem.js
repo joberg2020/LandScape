@@ -1,18 +1,18 @@
 import { Point } from './Point.js';
 import { Axis } from './Axis.js';
-import { Interval } from './Interval.js';
 
 export class CoordinateSystem {
   #x;
   #y;
   #autoAdjustOrigo;
   #origo;
+
   /**
    * Creates an instance of CoordinateSystem.
    * @param {Axis} xAxis
    * @param {Axis} yAxis
    * @param {Point} [origo=null] The origo of the coordinate system. If null, the origo will be set to (0, 0) if possible or to the center of the ranges of the axes.
-   * @param {boolean} [autoAdjustOrigo=false] If true, the origo will be adjusted on later changes of axes if it is not within the range of the new axes.
+   * @param {boolean} [autoAdjustOrigo=true] If true, the origo will be adjusted on later changes of axes if it is not within the range of the new axes.
    * @memberof CoordinateSystem
    * @throws {Error} If the axes are not Axis-objects.
    * @throws {Error} If the given origo is not within the range of the axes.
@@ -65,7 +65,7 @@ export class CoordinateSystem {
   }
 
   set autoAdjustOrigo(value) {
-    if (typeof value != 'boolean') {
+    if (typeof value !== 'boolean') {
       throw new Error('The autoAdjustOrigo property must be a boolean');
     }
     this.#autoAdjustOrigo = value;
@@ -156,28 +156,6 @@ export class CoordinateSystem {
    */
   get centerPoint() {
     return new Point(this.x.range.middle, this.y.range.middle);
-  }
-
-  /**
-   * @description Makes the axes even. The scale of the axes will be adjusted so that the number of pixels per unit is the same for both axes.
-   * If the axes are already even, nothing happens. Maybe deprecated, 'normalizeScales()' works better but in a different way...
-   * @memberof CoordinateSystem
-   */
-  makeAxesEven() {
-    if ((this.x.range.intervalLength * this.x.scale) > (this.y.range.intervalLength * this.y.scale)) {
-      this.y.scale = (this.x.range.intervalLength * this.x.scale) / this.y.range.intervalLength;
-    }
-    else {
-      this.x.scale = (this.y.range.intervalLength * this.y.scale) / this.x.range.intervalLength;
-    }
-  }
-
-  /**
-   * @description If axes scales have been changed, this function restores the axes to their previous scale. If they have not been changed, nothing happens.
-   */
-  restoreAxisToPreviousScale() {
-    this.x.undoScaleChange();
-    this.y.undoScaleChange();
   }
 
   contains(point) {

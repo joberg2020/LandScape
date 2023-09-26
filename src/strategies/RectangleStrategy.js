@@ -24,7 +24,7 @@ export class RectangleStrategy extends GeometryStrategy {
 
   renderObject(rectangle, canvasContext) {
 
-    // TODO: Probably easier to change rectangle to some polygon lookalike. 
+    // TODO: Not finished. Probably easier to change rectangle to some polygon lookalike. 
     canvasContext.beginPath;
     canvasContext.moveTo(rectangle.startingPoint.x, rectangle.startingPoint.y);
     canvasContext.lineTo(rectangle.startingPoint.x + Math.sin(rectangle.rotationAngle) * rectangle.width, rectangle.startingPoint.y + Math.cos(rectangle.rotationAngle) * rectangle.height);

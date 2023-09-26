@@ -29,7 +29,6 @@ export class GeometryObject {
 
   // Strategies 
   getMappedObject() {
-    console.log('CurrentThis: ', this)
     return this.strategy.getMappedObject(this);
   }
 

@@ -1,3 +1,4 @@
+import { PolygonStrategy } from "../strategies/PolygonStrategy";
 import { GeometryObject } from "./GeometryObject";
 
 export class Polygon extends GeometryObject {
@@ -5,7 +6,14 @@ export class Polygon extends GeometryObject {
   #nodePoints = [];
 
   constructor(strat=null, ...points) {
-    strat ? super(strat) : super();
+    if (strat instanceof PolygonStrategy) {
+      super(strat)
+    } 
+    else {
+      super();
+      // This is not a perfect solution.
+      points = [strat, ...points];
+    }
     for (const p of points) {
       super.validatePoint(p);
       this.#nodePoints.push(p);

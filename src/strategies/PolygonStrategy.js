@@ -11,7 +11,6 @@ export class PolygonStrategy extends GeometryStrategy {
   getMappedObject(polygon) {
     const mappedPoints = [];
     for (const p of polygon.listOfPoints) {
-      console.log('p is of type: ', p instanceof Point ? 'point' : 'other')
       mappedPoints.push(p.getMappedObject());
     }
     return new Polygon(this, ...mappedPoints);

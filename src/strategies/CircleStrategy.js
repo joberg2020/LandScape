@@ -22,6 +22,6 @@ export class CircleStrategy extends GeometryStrategy {
   renderObject(circle, canvasContext) {
     canvasContext.beginPath();
     // TODO: This radius adjustment could be faulty if mappingRatio differs between axes.
-    canvasContext.arc(circle.center.x, circle.center.y, circle.radius * this.mapper.mappingRatioX, 0, 2 * Math.PI);
+    canvasContext.arc(circle.center.x, circle.center.y, circle.radius * this.mapper.mappingRatioY, 0, 2 * Math.PI);
   }
 }
