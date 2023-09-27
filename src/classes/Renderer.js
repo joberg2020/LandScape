@@ -17,11 +17,10 @@ export class Renderer {
   #geometryObjects = [];
   #mappedGeometryObjects = [];
   #rotation = 0.0;
-  #listeners = {};
 
   /**
-   * 
-   * @param {HTMLCanvasElement} canvasElement 
+   * @param {CoordinateSystem} coordinateSystem The coordinatesystem to use as reference.
+   * @param {HTMLCanvasElement} canvasElement The canvas element to render on.
    */
   constructor(coordinateSystem, canvasElement) {
     if (!(canvasElement instanceof HTMLCanvasElement)) {
@@ -31,43 +30,6 @@ export class Renderer {
       this.#canvasContext = canvasElement.getContext('2d');
       // Create the Mapper
       this.#initializeMapper(coordinateSystem, canvasElement);
-      this.#addEventListeners(canvasElement);
-    }
-  }
-
-  /**
-   * Add callback functions. 
-   * @param {String} event Name of event to add.
-   * @param {Function} callback The callback function to store for the event.
-   */
-  on(event, callback) {
-    if (!this.#listeners[event]) {
-      this.#listeners[event] = [];
-    }
-    this.#listeners[event].push(callback);
-  }
-
-  #emit(event, data) {
-    if (this.#listeners[event]) {
-      for (const callback of this.#listeners[event]) {
-        callback(data);
-      }
-    }
-  }
-
-  /**
-   * If source coordinate system has different width/height ratio compared to canvas, the canvas height will be adjusted to force the same ratio for canvas. 
-   * Canvas width will be the same as before.
-   * @param {HTMLCanvasElement} canvas 
-   * @param {CoordinateSystem} sourceSystem 
-   */
-  #resizeCanvasIfNeeded(canvas, sourceSystem) {
-    const ratioSource = (sourceSystem.x.range.intervalLength * sourceSystem.x.scale)/ (sourceSystem.y.range.intervalLength * sourceSystem.y.scale);
-    const ratioTarget = canvas.width / canvas.height
-
-    if (ratioSource !== ratioTarget) {
-      ratioSource == 1 ? canvas.setAttribute('height', canvas.width) :
-        canvas.setAttribute('height', canvas.width * ratioSource);
     }
   }
 
@@ -82,17 +44,27 @@ export class Renderer {
       }));
   }
 
-  #addEventListeners(canvas) {
-    canvas.addEventListener('click', this.#handleClickOnCanvas.bind(this));
+  /**
+   * If source coordinate system has different width/height ratio compared to canvas, the canvas height will be adjusted to force the same ratio for canvas. 
+   * Canvas width will be the same as before.
+   * @param {HTMLCanvasElement} canvas This canvas will have its height resized to match the source coordinate system's aspect ratio.
+   * @param {CoordinateSystem} sourceSystem 
+   */
+  #resizeCanvasIfNeeded(canvas, sourceSystem) {
+    const ratioSource = (sourceSystem.x.range.intervalLength * sourceSystem.x.scale)/ (sourceSystem.y.range.intervalLength * sourceSystem.y.scale);
+    const ratioTarget = canvas.width / canvas.height
+    console.log('Sources at resize canvas: ', sourceSystem)
+    if (ratioSource !== ratioTarget) {
+      ratioSource == 1 ? canvas.setAttribute('height', canvas.width) :
+        canvas.setAttribute('height', canvas.width * ratioSource);
+    }
   }
 
-  #handleClickOnCanvas(event) {
+  getSourcePointFromCanvasEvent(event) {
     const rect = event.target.getBoundingClientRect();
     const targetPoint = new Point(event.clientX - rect.left, event.clientY - rect.top, new PointStrategy(this.mapper));
     const unRotatedPoint = targetPoint.getRotatedObject(-this.#rotation);
-    const sourcePoint = this.#mapper.unMapPoint(unRotatedPoint);
-    this.#emit('clickOnCoordinate',{x: sourcePoint.x, y: sourcePoint.y});
-    console.log('x: ', sourcePoint.x, '\ny: ', sourcePoint.y);
+    return this.#mapper.unMapPoint(unRotatedPoint);
   }
 
   get mapper() {
@@ -112,24 +84,43 @@ export class Renderer {
     }
   }
 
+  clearMappedObjects() {
+    this.#mappedGeometryObjects = [];
+  }
+
   /**
  * Changes the coordinates for the mapped geometry objects by rotating them with the given angle
  * @param {number} degrees 
  */
   rotateObjects(degrees) {
     const radians = (Math.PI / 180) * degrees;
+    this.#rotateObjectsInRadians(radians);
+  }
+
+  #rotateObjectsInRadians(radians) {
     this.#rotation += radians;
     const rotatedObjects = [];
     for (const obj of this.#mappedGeometryObjects) {
       rotatedObjects.push(obj.getRotatedObject(radians))
     }
     this.#mappedGeometryObjects = rotatedObjects;
-    this.#canvasContext.reset();
     this.renderOnCanvas();
   }
 
   /**
-   * Resizes the sourcesystems dimensions to suitable size for the current GEometry-objects.
+   * If the mapped obbject have been recreated after change of mapping ratio, check if they were rotated. 
+   * If they were, rotate the newly mapped objects again.
+   */
+  #addOldRotationOnChange() {
+    if (this.#rotation !== 0) {
+      const previousRotation = this.#rotation;
+      this.#rotation = 0;
+      this.#rotateObjectsInRadians(previousRotation);
+    }
+  }
+
+  /**
+   * Resizes the sourcesystems dimensions to a size that fits all the current Geometry-objects.
    */
   fitObjectsInCanvas() {
     this.#mapper.changeSourceAxesIntervals(
@@ -138,9 +129,42 @@ export class Renderer {
       this.#getminYOfObjects(),
       this.#getMaxYOfObjects()
     );
-    this.#canvasContext.reset();
+    
     this.#resizeCanvasIfNeeded(this.#canvasContext.canvas, this.#mapper.sourceSystem);
-    this.#mapper.initializeMappingRatios();
+    console.log(this.#canvasContext.canvas.width, this.#canvasContext.canvas.height)
+    this.#mapper.updateMappingRatios();
+
+    this.clearMappedObjects();
+    
+    this.mapObjects();
+    this.#addOldRotationOnChange();
+    this.renderOnCanvas()
+  }
+
+  /**
+   * Renders all the mapped geometryobjects on the canvas. 
+   */
+  renderOnCanvas() {
+    this.#canvasContext.reset();
+    for (const obj of this.#mappedGeometryObjects) {
+      obj.renderObject(this.#canvasContext);
+    }
+  }
+
+  showCenter() {
+    const center = this.mapper.sourceSystem.centerPoint;
+    center.strategy = new PointStrategy(this.mapper);
+    center.getMappedObject().renderObject(this.#canvasContext);
+  }
+
+  harmonizeScales() {
+    this.#mapper.harmonizeSourceScales();
+    this.#mapper.harmonizeTargetScales();
+
+    
+    this.clearMappedObjects();
+    this.mapObjects();
+    this.#addOldRotationOnChange();
     this.renderOnCanvas();
   }
 
@@ -159,30 +183,4 @@ export class Renderer {
   #getMaxYOfObjects() {
     return Math.max(...this.#geometryObjects.map(obj => obj.maxY));
   }
-
-  /**
-   * Renders all the mapped geometryobjects on the canvas. 
-   */
-  renderOnCanvas() {
-    this.#canvasContext.reset();
-    for (const obj of this.#mappedGeometryObjects) {
-      obj.renderObject(this.#canvasContext);
-    }
-  }
-
-  showCenter() {
-    const center = this.mapper.sourceSystem.centerPoint;
-    // Same source-system centerpoint but with a pointStrategy:
-    const thatPoint = new Point(center.x, center.y, new PointStrategy(this.mapper));
-
-    // render mapped point
-    thatPoint
-      .getMappedObject()
-      .renderObject(this.#canvasContext);
-
-    // render unmapped point
-    thatPoint.renderObject(this.#canvasContext);
-
-  }
-
 }

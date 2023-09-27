@@ -8,8 +8,8 @@ export class Mapper {
 
   #sourceSystem;
   #targetSystem;
-  #xMappingRatio;
-  #yMappingRatio;
+  #MappingRatioX;
+  #MappingRatioY;
 
   /**
    * 
@@ -22,39 +22,33 @@ export class Mapper {
     
     this.#sourceSystem = sourceSystem;
     this.#targetSystem = targetSystem;
-    this.#initializeMappingRatios();
-
-  }
-
-  initializeMappingRatios() {
-    this.#initializeMappingRatios();
+    this.updateMappingRatios();
   }
 
   /**
    * Calculates and sets the mapping ratio properties, which is the translater between sourcesystem and target coordinate system. 
    * Mapping ratio depends on both systems axes´ intervals and scales and also if the scales are reversed. There is a ratio for each axis.
    */
-  #initializeMappingRatios() {
-    this.#xMappingRatio = 
-    (this.targetSystem.x.range.intervalLength * this.sourceSystem.x.scale) /
-    (this.sourceSystem.x.range.intervalLength * this.targetSystem.x.scale);
+  updateMappingRatios() {
+    this.#MappingRatioX = 
+    ((this.targetSystem.x.range.intervalLength / this.sourceSystem.x.scale)) /
+    ((this.sourceSystem.x.range.intervalLength / this.targetSystem.x.scale));
     
     if (this.sourceSystem.x.isReversed !== this.targetSystem.x.isReversed) {
-      this.#xMappingRatio *= -1;
+      this.#MappingRatioX *= -1;
     }
     
-    this.#yMappingRatio = 
-    (this.targetSystem.y.range.intervalLength * this.sourceSystem.y.scale) / 
-    (this.sourceSystem.y.range.intervalLength * this.targetSystem.y.scale);
+    this.#MappingRatioY = 
+    ((this.targetSystem.y.range.intervalLength / this.sourceSystem.y.scale)) / 
+    ((this.sourceSystem.y.range.intervalLength / this.targetSystem.y.scale));
 
     if (this.sourceSystem.y.isReversed !== this.targetSystem.y.isReversed) {
-      this.#yMappingRatio *= -1;
+      this.#MappingRatioY *= -1;
     }
-    console.log('target.x.range.length: ', this.#targetSystem.x.range.intervalLength, 'source.x.range.length: ',
+    console.log('target.x.range.length: ', this.#targetSystem.x.range.intervalLength, 'target.y.range.length: ', this.#targetSystem.y.range.intervalLength,'source.x.range.length: ',
      this.#sourceSystem.x.range.intervalLength,' SourceYLength: ', this.#sourceSystem.y.range.intervalLength,'  sourceSystem.x.scale: ', this.#sourceSystem.x.scale, 'targetSystem.x.scale: ',
-     this.#sourceSystem.x.range.intervalLength,' sourceSystem.y.scale: ', this.#sourceSystem.y.scale, 'targetSystem.y.scale: ', this.#targetSystem.y.scale,
+     this.#targetSystem.x.scale,' sourceSystem.y.scale: ', this.#sourceSystem.y.scale, 'targetSystem.y.scale: ', this.#targetSystem.y.scale,
      'sourceSystemYScale: ', this.#sourceSystem.y.scale, 'targetSystemYScale: ', this.#targetSystem.y.scale);
-    
   }
 
   get sourceSystem() {
@@ -66,11 +60,11 @@ export class Mapper {
   }
 
   get mappingRatioX() {
-    return this.#xMappingRatio;
+    return this.#MappingRatioX;
   }
 
   get mappingRatioY() {
-    return this.#yMappingRatio;
+    return this.#MappingRatioY;
   }
 
   #validateCoordinateSystem(system) {
@@ -81,14 +75,14 @@ export class Mapper {
 
   changeSourceAxesIntervals(minX, maxX, minY, maxY) {
     console.log('minX: ', minX, ' maxX: ', maxX, ' minY: ', minY, ' maxY: ', maxY);
-    this.#sourceSystem.x.range.lowerBound = minX - 5;
-    this.#sourceSystem.x.range.upperBound = maxX + 5;
-    this.#sourceSystem.y.range.lowerBound = minY - 5;
-    this.#sourceSystem.y.range.upperBound = maxY + 5;
+    this.#sourceSystem.x.range.lowerBound = minX ;
+    this.#sourceSystem.x.range.upperBound = maxX ;
+    this.#sourceSystem.y.range.lowerBound = minY ;
+    this.#sourceSystem.y.range.upperBound = maxY ;
 
     // update MappingRatios
-    this.sourceSystem.normalizeScales();
-    this.#initializeMappingRatios();
+   // this.sourceSystem.normalizeScales();
+    this.updateMappingRatios();
   }
 
   unMapPoint(point) {
@@ -97,5 +91,20 @@ export class Mapper {
     return new Point(sourceX, sourceY);
   }
 
-  
+    /**
+   * @description Makes the axes of the source coordinate system even. If the axes are already even, nothing happens.
+   */
+    harmonizeSourceScales() {
+      this.sourceSystem.makeAxesEven();
+      this.updateMappingRatios();
+    }
+
+      /**
+   * @description Makes the axes of the target coordinate system even. If the axes are already even, nothing happens.
+   */
+  harmonizeTargetScales() {
+    this.targetSystem.makeAxesEven();
+    this.updateMappingRatios();
+  }
+
 }

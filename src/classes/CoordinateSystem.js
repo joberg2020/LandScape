@@ -158,6 +158,21 @@ export class CoordinateSystem {
     return new Point(this.x.range.middle, this.y.range.middle);
   }
 
+    /**
+   * @description Makes the axes even. The scale of the axes will be adjusted so that the number of pixels per unit is the same for both axes.
+   * If the axes are already even, nothing happens. Maybe deprecated, 'normalizeScales()' works better but in a different way...
+   * @memberof CoordinateSystem
+   */
+    makeAxesEven() {
+      if ((this.x.range.intervalLength * this.x.scale) > (this.y.range.intervalLength * this.y.scale)) {
+        this.y.scale = (this.x.range.intervalLength * this.x.scale) / this.y.range.intervalLength;
+      }
+      else {
+        this.x.scale = (this.y.range.intervalLength * this.y.scale) / this.x.range.intervalLength;
+      }
+    }
+  
+
   contains(point) {
     return this.#x.contains(point.x) && this.#y.contains(point.y);
   }

@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+h1 {
+    font-size: 2rem;
+}
+button {
+    min-height: 1rem;
+
+}

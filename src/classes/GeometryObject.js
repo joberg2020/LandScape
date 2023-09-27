@@ -1,14 +1,24 @@
 import { Point } from "./Point";
 export class GeometryObject {
 
-  strategy;
+  #strategy;
   
   constructor(strat = null) {
     if (this.constructor === GeometryObject) {
       throw new Error('GeometryObject is an abstract class and cannot be instantiated directly');
     }
     else if (strat!== null) {
-      this.strategy = strat;
+      this.#strategy = strat;
+    }
+  }
+
+  get strategy() {
+    return this.#strategy;
+  }
+
+  set strategy (strat) {
+    if (strat!== null) {
+      this.#strategy = strat;
     }
   }
 
@@ -33,10 +43,10 @@ export class GeometryObject {
   }
 
   getRotatedObject(radians) {
-    return this.strategy.getRotatedObject(this, radians);
+    return this.#strategy.getRotatedObject(this, radians);
   }
 
   renderObject(canvasContext) {
-    return this.strategy.renderObject(this, canvasContext);
+    return this.#strategy.renderObject(this, canvasContext);
   }
 }
