@@ -13,6 +13,14 @@ describe('Testing functions of the Point-class', () => {
       expect(point.x).toBe(1);
       expect(point.y).toBe(2);
     });
+    describe('Testing equals function', () => {
+      it('should return true on point with equal coordinates and false on unequal coordinates', () => {
+        const point1 = new Point(1, -4);
+        const point2 = new Point(1, -4);
+        const point3 = new Point(1, 2);
+        expect(point1.equals(point2)).toBe(true)
+        expect (point1.equals(point3)).toBe(false);
+      })
+    })
   });
-}
-);
+});

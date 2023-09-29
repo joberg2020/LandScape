@@ -76,20 +76,15 @@ describe('Testing functions of the CoordinateSystem-class', () => {
       expect(() => coordinateSystem.y = '2').toThrowError('The axes must be Axis-objects');
     });
   });
-  describe('Testing functions', () => {
+  describe('Testing function contains', () => {
     it('should return true if the given point is within the coordinate system', () => {
       const xAxis = new Axis(new Interval(0, 10));
       const yAxis = new Axis(new Interval(0, 10));
       const coordinateSystem = new CoordinateSystem({ xAxis, yAxis });
-      const point = new Point(5, 5);
-      expect(coordinateSystem.contains(point)).toBe(true);
-    });
-    it('should return false if the given point is not within the coordinate system', () => {
-      const xAxis = new Axis(new Interval(0, 10));
-      const yAxis = new Axis(new Interval(0, 10));
-      const coordinateSystem = new CoordinateSystem({ xAxis, yAxis });
-      const point = new Point(11, 11);
-      expect(coordinateSystem.contains(point)).toBe(false);
+      const point1 = new Point(5, 5);
+      const point2 = new Point(11, 11);
+      expect(coordinateSystem.contains(point1)).toBe(true);
+      expect(coordinateSystem.contains(point2)).toBe(false);
     });
   });
 });

@@ -13,11 +13,11 @@ describe('Testing functions of the Axis-class', () => {
       const axis = new Axis(range);
       expect(axis.range).toBe(range);
     });
-    it('should set the correct scale', () => {
+    it('should set the correct default scale', () => {
       const axis = new Axis(new Interval(0, 10));
       expect(axis.scale).toBe(1);
     });
-    it('should recieve scale as a parameter', () => {
+    it('should recieve scale as a parameter if given', () => {
       const axis = new Axis(new Interval(0, 10), 2);
       expect(axis.scale).toBe(2);
     });
@@ -27,11 +27,11 @@ describe('Testing functions of the Axis-class', () => {
     it('should throw an error if the scale is not a positive number', () => {
       expect(() => new Axis(new Interval(0, 10), -2)).toThrowError('The scale must be a positive number larger than 0');
     });
-    it('should set the correct isReversed', () => {
+    it('should set the correct default for isReversed', () => {
       const axis = new Axis(new Interval(0, 10));
       expect(axis.isReversed).toBe(false);
     });
-    it('should recieve isReversed as a parameter', () => {
+    it('should recieve isReversed as a parameter if given', () => {
       const axis = new Axis(new Interval(0, 10), 1, true);
       expect(axis.isReversed).toBe(true);
     });
@@ -46,7 +46,7 @@ describe('Testing functions of the Axis-class', () => {
       expect(axis.contains(11)).toBe(false);
     });
   });
-  describe('Testing range', () => {
+  describe('Testing setter range', () => {
     it('should set the correct range', () => {
       const axis = new Axis(new Interval(0, 10));
       const newRange = new Interval(0, 20);

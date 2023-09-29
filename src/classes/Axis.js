@@ -11,7 +11,6 @@ export class Axis {
   #range;
   #scale;
   #isReversed;
-  #scaleHistory = [];
 
   /**
    * Creates an instance of Axis. 
@@ -60,17 +59,7 @@ export class Axis {
    */
   set scale(newScale) {
     this.#validateScale(newScale);
-    this.#scaleHistory.push(this.#scale);
     this.#scale = newScale;
-  }
-
-  /**
-   * @description Undoes the last scale change. If no change has been made, nothing happens.
-   */
-  undoScaleChange() {
-    if (this.#scaleHistory.length > 0) {
-      this.#scale = this.#scaleHistory.pop();
-    }
   }
 
   get isReversed() {

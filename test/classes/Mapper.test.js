@@ -3,6 +3,7 @@ import { CoordinateSystem } from '../../src/classes/CoordinateSystem.js';
 import { Axis } from '../../src/classes/Axis.js';
 import { Interval } from '../../src/classes/Interval.js';
 import { Mapper } from '../../src/classes/Mapper.js';
+import { PointStrategy } from '../../src/strategies/PointStrategy.js';
 
 describe('Testing functions of the Mapper-class', () => {
   const sourceSystem = new CoordinateSystem({ xAxis: new Axis(new Interval(0, 10)), yAxis: new Axis(new Interval(0, 20)) });
@@ -40,15 +41,15 @@ describe('Testing functions of the Mapper-class', () => {
       expect(mapper.mappingRatioY).toBe(0.5);
     });
   });
-  describe('Testing mapPoint', () => {
-    it('should return the correct mapped point', () => {
-      const targetSystem = new CoordinateSystem({ xAxis: new Axis(new Interval(0, 300), 1, false), yAxis: new Axis(new Interval(0, 150), 1, true) });
+});
+describe('Testing functions of strategies', () => {
+  describe('Testing mapping through PointStrategy', () => {
+    const targetSystem = new CoordinateSystem({ xAxis: new Axis(new Interval(0, 300), 1, false), yAxis: new Axis(new Interval(0, 150), 1, true) });
       const sourceSystem = new CoordinateSystem({ xAxis: new Axis(new Interval(-10, 10)), yAxis: new Axis(new Interval(100, 200)) });
       const mapper = new Mapper(sourceSystem, targetSystem);
-      const point = new Point(10, 100);
-      const mappedPoint = mapper.mapPoint(point);
+      const point = new Point(10, 100, new PointStrategy(mapper));
+      const mappedPoint = point.getMappedObject()
       expect(mappedPoint.x).toBe(300);
       expect(mappedPoint.y).toBe(150);
-    });
-  });
-});
+  })
+})

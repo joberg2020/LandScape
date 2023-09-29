@@ -8,8 +8,7 @@ import { Polygon } from './classes/Polygon.js';
 import { PointStrategy } from './strategies/PointStrategy.js';
 import { PolygonStrategy } from './strategies/PolygonStrategy.js';
 import { CircleStrategy } from './strategies/CircleStrategy.js';
-import { RectangleStrategy } from './strategies/RectangleStrategy.js';
-import { Rectangle } from './classes/Rectangle.js';
+
 import { Line } from './classes/Line.js';
 import { LineStrategy } from './strategies/LineStrategy.js';
 
@@ -25,11 +24,11 @@ const canvas = document.getElementById('targetCanvas');
 function showMap() {
   // Source-system data, it is good to start with the ranges of the x and y axes.
 let xRange = new Interval(420, 510);
-let yRange = new Interval(475, 560);
+let yRange = new Interval(465, 560);
 
 // The intervals are used as arguments to the Axis constructor.
 let xAxis = new Axis(xRange, 1);
-let yAxis = new Axis(yRange, 2, true);
+let yAxis = new Axis(yRange, 1, true);  // Y-axis is upside-down in my reference system (true)
 
 // Create the source coordinate system.
 const source = new CoordinateSystem({xAxis: xAxis, yAxis: yAxis});
@@ -73,8 +72,8 @@ renderer.renderOnCanvas();
 function showGraph() {
   // Create coordinatesystem:
   const source = new CoordinateSystem({
-    xAxis: new Axis(new Interval(-50, 50), 2),
-    yAxis: new Axis(new Interval(-50, 50), 1.5)
+    xAxis: new Axis(new Interval(-50, 50), 1),
+    yAxis: new Axis(new Interval(-40, 40), 1)
   });
   
   // Create the renderer (variable already initialized)
@@ -83,20 +82,19 @@ function showGraph() {
   // Create Strategies and pass the mapper-object. 
   const pointStrat = new PointStrategy(renderer.mapper);
   const LineStrat = new LineStrategy(renderer.mapper);
-  // Create the lines for the axes
+  // Create the axes and lines for the axes
   const xAxis = new Line(new Point(-50, 0, pointStrat), new Point(50, 0, pointStrat), LineStrat);
   const yAxis = new Line(new Point(0, -50, pointStrat), new Point(0, 50, pointStrat), LineStrat);
   renderer.add(xAxis);
   renderer.add(yAxis);
 
   // Maybe create a function of some kind 
-  const f = (x) => 0.1*x*x - 30; //+2*Math.sqrt(x) - 10*x -3;
+  const f = (x) => 5* Math.sin(x);//0.1*x*x - 30; //+2*Math.sqrt(x) - 10*x -3;
 
-  // Creates points and lines for your function and add to renderer
-  for (let i = -30; i <= 30; i+= 0.1) {
+  // Creates points for your function and add to renderer
+  for (let i = -50; i <= 50; i+= 0.001) {
     const p = new Point(i, f(i), pointStrat);
-    const middleP = new Point(i + 0.05, f(i+0.05), pointStrat);
-    renderer.add(new Line(p, middleP, LineStrat))
+    renderer.add(p);
   }
 
   renderer.mapObjects();
@@ -104,8 +102,6 @@ function showGraph() {
 }
 
 // Stuff used by both demo-functions
-
-
 function getPointFromRenderer(event) {
   const clickedPoint = renderer.getSourcePointFromCanvasEvent(event)
   xOutput.textContent = 'x: ' + clickedPoint.x;
@@ -117,10 +113,6 @@ function rotate() {
   renderer.rotateObjects(90);
 }
 
-function fitToCanvas() {
-  renderer.fitObjectsInCanvas();
-}
-
 function harmonize() {
   renderer.harmonizeScales();
 }
@@ -129,19 +121,23 @@ function showCenter() {
   renderer.showCenter();
 }
 
+function zoom() {
+  renderer.zoom(1.2);
+}
+
 const xOutput = document.getElementById('xValue');
 const yOutput = document.getElementById('yValue');
 
 const landMapButton = document.getElementById('landMap');
 const graphButton = document.getElementById('graphButton');
 const rotateButton = document.getElementById('rotateButton');
-const fitButton = document.getElementById('fitToCanvas');
 const showButton = document.getElementById('showCenter');
 const harmonizeButton = document.getElementById('harmonizeButton');
+const zoomButton = document.getElementById('zoom');
 
 landMapButton.addEventListener('click', showMap);
 graphButton.addEventListener('click', showGraph);
 rotateButton.addEventListener('click', rotate);
-fitButton.addEventListener('click', fitToCanvas);
 showButton.addEventListener('click', showCenter);
 harmonizeButton.addEventListener('click', harmonize);
+zoomButton.addEventListener('click', zoom);

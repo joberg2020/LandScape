@@ -23,7 +23,6 @@ export class PointStrategy extends GeometryStrategy {
     return mappingRatio * (pointValue - fixPointSource) + fixPointTarget;
   }
 
-
   getRotatedObject(point, radians) {
       const originalX = point.x;
       const originalY = point.y;
@@ -31,6 +30,12 @@ export class PointStrategy extends GeometryStrategy {
       const newX = (originalX - centerPoint.x) * Math.cos(radians) - (originalY - centerPoint.y) * Math.sin(radians) + centerPoint.x;
       const newY = (originalX - centerPoint.x) * Math.sin(radians) + (originalY - centerPoint.y) * Math.cos(radians) + centerPoint.y;
       return new Point(newX, newY, this)
+  }
+
+  unMapPoint(point) {
+    const sourceX = ((point.x - this.mapper.targetSystem.centerPoint.x) / this.mapper.mappingRatioX) + this.mapper.sourceSystem.centerPoint.x;
+    const sourceY = ((point.y - this.mapper.targetSystem.centerPoint.y) / this.mapper.mappingRatioY) + this.mapper.sourceSystem.centerPoint.y;
+    return new Point(sourceX, sourceY, this);
   }
 
   renderObject(point, canvasContext) {

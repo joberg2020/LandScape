@@ -13,7 +13,6 @@ export class CoordinateSystem {
    * @param {Axis} yAxis
    * @param {Point} [origo=null] The origo of the coordinate system. If null, the origo will be set to (0, 0) if possible or to the center of the ranges of the axes.
    * @param {boolean} [autoAdjustOrigo=true] If true, the origo will be adjusted on later changes of axes if it is not within the range of the new axes.
-   * @memberof CoordinateSystem
    * @throws {Error} If the axes are not Axis-objects.
    * @throws {Error} If the given origo is not within the range of the axes.
    */
@@ -35,15 +34,6 @@ export class CoordinateSystem {
     if (!(axis instanceof Axis)) {
       throw new Error('The axes must be Axis-objects');
     }
-  }
-
-  /**
-   * Changes the scaling of coordinatesystems axes to adjust for uneven defined intervals. I.e. if range of x is bigger than range of y.
-   */
-  normalizeScales() {
-    const ratio = this.x.range.intervalLength / this.y.range.intervalLength;
-    this.x.scale *= ratio;
-    this.y.scale /= ratio;
   }
 
   /**
@@ -74,8 +64,6 @@ export class CoordinateSystem {
   /**
    * @description Gets the x-axis of the coordinate system.
    * @return {Axis} The x-axis of the coordinate system.
-   * @readonly
-   * @memberof CoordinateSystem
    */
   get x() {
     return this.#x;
@@ -83,7 +71,6 @@ export class CoordinateSystem {
 
   /**
    * @description Tries to set a new x-axis.
-   * @memberof CoordinateSystem
    * @param {Axis} newAxis The new axis for x. 
    * @throws {Error} If the axis is not an Axis-object.
    * @throws {Error} If the origo is not within the range of the new axis and autoAdjustOrigo is disabled (i.e. is false).
@@ -111,14 +98,12 @@ export class CoordinateSystem {
 
   /**
    * @description Tries to set a new y-axis.
-   * @memberof CoordinateSystem
    * @param {Axis} newAxis The new axis for y. 
    * @throws {Error} If the axis is not an Axis-object.
    * @throws {Error} If the origo is not within the range of the new axis and autoAdjustOrigo is disabled (i.e. is false).
    */
   set y(newAxis) {
     this.#validateAxis(newAxis);
-
     if (!newAxis.contains(this.origo.y)) {
       if (this.#autoAdjustOrigo) {
         this.#y = newAxis;
@@ -150,8 +135,6 @@ export class CoordinateSystem {
   /**
    * Returns the center point of the coordinate system.
    *
-   * @readonly
-   * @memberof CoordinateSystem
    * @return {Point} The center point of the coordinate system.
    */
   get centerPoint() {
@@ -161,7 +144,6 @@ export class CoordinateSystem {
     /**
    * @description Makes the axes even. The scale of the axes will be adjusted so that the number of pixels per unit is the same for both axes.
    * If the axes are already even, nothing happens. Maybe deprecated, 'normalizeScales()' works better but in a different way...
-   * @memberof CoordinateSystem
    */
     makeAxesEven() {
       if ((this.x.range.intervalLength * this.x.scale) > (this.y.range.intervalLength * this.y.scale)) {
@@ -172,7 +154,6 @@ export class CoordinateSystem {
       }
     }
   
-
   contains(point) {
     return this.#x.contains(point.x) && this.#y.contains(point.y);
   }

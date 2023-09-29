@@ -46,7 +46,7 @@ export class Interval {
   }
 
   /**
-   * @description Checks if the current interval is lower than the value.
+   * Checks if the current interval is lower than the value.
    * @param {number} value The number to compare with this interval.
    * @throws {Error} If the value is not a number.
    * @returns True if the current interval is lower than the value, false otherwise.

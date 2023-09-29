@@ -12,3 +12,7 @@ button {
     min-height: 1rem;
 
 }
+
+canvas {
+    margin-left: 5rem;
+}
